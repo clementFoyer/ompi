@@ -23,10 +23,7 @@
 #include "osc_monitoring_module.h"
 #include "osc_monitoring_passive_target.h"
 
-/* module_type correspond to the ompi_osc_## template ##_module_t type 
- * comm correspond to the comm field name in ompi_osc_## template ##_module_t
- * 
- * The magic used here is that for a given module type (given with the
+/* The magic used here is that for a given module type (given with the
  * {template} parameter), we generate a set of every functions defined
  * in ompi_osc_base_module_t, the ompi_osc_monitoring_module_##
  * template ##_template variable recording the original set of
@@ -37,17 +34,11 @@
  * the original function that had been saved in the
  * ompi_osc_monitoring_module_## template ##_template variable.
  */
-#define OSC_MONITORING_MODULE_TEMPLATE_GENERATE(template, module_type, comm) \
+#define OSC_MONITORING_MODULE_TEMPLATE_GENERATE(template)               \
     /* Generate the proper symbol for the                               \
        ompi_osc_monitoring_module_## template ##_template variable */   \
     OMPI_OSC_MONITORING_MODULE_GENERATE(template);                      \
-    OMPI_OSC_MONITORING_MODULE_INIT_GENERATE(template);			\
-    /* Generate module specific module->comm accessor */                \
-    static inline struct ompi_communicator_t*                           \
-    ompi_osc_monitoring_## template ##_get_comm(ompi_win_t*win)         \
-    {                                                                   \
-        return ((module_type*)win->w_osc_module)->comm;                 \
-    }                                                                   \
+    OMPI_OSC_MONITORING_MODULE_INIT_GENERATE(template);                 \
     /* Generate each module specific functions */                       \
     OSC_MONITORING_GENERATE_TEMPLATE_ACCUMULATE(template)               \
     OSC_MONITORING_GENERATE_TEMPLATE_ACTIVE_TARGET(template)            \
@@ -78,4 +69,3 @@
     ompi_osc_monitoring_## template ##_set_template(module)
 
 #endif /* MCA_OSC_MONITORING_TEMPLATE_H */
-

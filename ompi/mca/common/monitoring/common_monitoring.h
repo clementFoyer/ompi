@@ -66,14 +66,14 @@ OMPI_DECLSPEC void mca_common_monitoring_record_osc(int world_rank, size_t data_
 /* Records COLL communications. */
 OMPI_DECLSPEC void mca_common_monitoring_record_coll(int world_rank, size_t data_size);
 
-/* Translate the rank from the given communicator of a process to its rank in MPI_COMM_RANK. */
-static inline int mca_common_monitoring_get_world_rank(int dst, struct ompi_communicator_t*comm,
-                                                       int*world_rank)
+/* Translate the rank from the given rank of a process to its rank in MPI_COMM_RANK. */
+static inline int mca_common_monitoring_get_world_rank_grp(int dest, ompi_group_t *group,
+                                                           int *world_rank)
 {
     opal_process_name_t tmp;
 
     /* find the processor of the destination */
-    ompi_proc_t *proc = ompi_group_get_proc_ptr(comm->c_remote_group, dst, true);
+    ompi_proc_t *proc = ompi_group_get_proc_ptr(group, dest, true);
     if( ompi_proc_is_sentinel(proc) ) {
         tmp = ompi_proc_sentinel_to_name((uintptr_t)proc);
     } else {
@@ -92,6 +92,13 @@ static inline int mca_common_monitoring_get_world_rank(int dst, struct ompi_comm
     /* Use intermediate variable to avoid overwriting while looking up in the hashtbale. */
     if( ret == OPAL_SUCCESS ) *world_rank = (int)rank;
     return ret;
+}
+
+/* Translate the rank from the given communicator of a process to its rank in MPI_COMM_RANK. */
+static inline int mca_common_monitoring_get_world_rank(int dst, struct ompi_communicator_t*comm,
+                                                       int*world_rank)
+{
+    return mca_common_monitoring_get_world_rank_grp(dst, comm->c_remote_group, world_rank);
 }
 
 /* Return the current status of the monitoring system 0 if off or the

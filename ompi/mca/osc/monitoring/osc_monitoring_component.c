@@ -8,6 +8,7 @@
  */
 
 #include <ompi_config.h>
+#include <string.h>
 #include "osc_monitoring.h"
 #include <ompi/constants.h>
 #include <ompi/communicator/communicator.h>
@@ -22,23 +23,10 @@
 /* Include template generating macros */
 #include "osc_monitoring_template.h"
 
-#include <ompi/mca/osc/rdma/osc_rdma.h>
-OSC_MONITORING_MODULE_TEMPLATE_GENERATE(rdma, ompi_osc_rdma_module_t, comm)
-#undef GET_MODULE
-
-#include <ompi/mca/osc/sm/osc_sm.h>
-OSC_MONITORING_MODULE_TEMPLATE_GENERATE(sm, ompi_osc_sm_module_t, comm)
-#undef GET_MODULE
-
-#include <ompi/mca/osc/pt2pt/osc_pt2pt.h>
-OSC_MONITORING_MODULE_TEMPLATE_GENERATE(pt2pt, ompi_osc_pt2pt_module_t, comm)
-#undef GET_MODULE
-
-#ifdef OMPI_WITH_OSC_PORTALS4
-#include <ompi/mca/osc/portals4/osc_portals4.h>
-OSC_MONITORING_MODULE_TEMPLATE_GENERATE(portals4, ompi_osc_portals4_module_t, comm)
-#undef GET_MODULE
-#endif /* OMPI_WITH_OSC_PORTALS4 */
+OSC_MONITORING_MODULE_TEMPLATE_GENERATE(rdma)
+OSC_MONITORING_MODULE_TEMPLATE_GENERATE(sm)
+OSC_MONITORING_MODULE_TEMPLATE_GENERATE(pt2pt)
+OSC_MONITORING_MODULE_TEMPLATE_GENERATE(portals4)
 
 /***************************************/
 

@@ -40,10 +40,10 @@
 
 /* Define and set the ompi_osc_monitoring_## template ##_template
  * variable. The functions recorded here are linked to the original
- * functions of the original {template} module that were replaced.
+ * functions of the original {template} module that was replaced.
  */
 #define MCA_OSC_MONITORING_MODULE_TEMPLATE_GENERATE(template)           \
-    static ompi_osc_base_module_t OMPI_OSC_MONITORING_TEMPLATE_VARIABLE(template) = { \
+    static const ompi_osc_base_module_t OMPI_OSC_MONITORING_TEMPLATE_VARIABLE(template) = { \
         .osc_win_attach = ompi_osc_monitoring_## template ##_attach,    \
         .osc_win_detach = ompi_osc_monitoring_## template ##_detach,    \
         .osc_free = ompi_osc_monitoring_## template ##_free,            \
