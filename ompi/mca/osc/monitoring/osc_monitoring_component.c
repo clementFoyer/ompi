@@ -8,7 +8,6 @@
  */
 
 #include <ompi_config.h>
-#include <string.h>
 #include "osc_monitoring.h"
 #include <ompi/constants.h>
 #include <ompi/communicator/communicator.h>
@@ -19,16 +18,12 @@
 #include <ompi/mca/osc/base/base.h>
 #include <opal/mca/base/mca_base_component_repository.h>
 
-/***************************************/
-/* Include template generating macros */
-#include "osc_monitoring_template.h"
+/**************************************************/
+/* Include templated macros and inlined functions */
 
-OSC_MONITORING_MODULE_TEMPLATE_GENERATE(rdma)
-OSC_MONITORING_MODULE_TEMPLATE_GENERATE(sm)
-OSC_MONITORING_MODULE_TEMPLATE_GENERATE(pt2pt)
-OSC_MONITORING_MODULE_TEMPLATE_GENERATE(portals4)
+#include "osc_monitoring_template_gen.h"
 
-/***************************************/
+/**************************************************/
 
 static int mca_osc_monitoring_component_init(bool enable_progress_threads,
                                              bool enable_mpi_threads)
@@ -96,20 +91,11 @@ static int mca_osc_monitoring_component_select(struct ompi_win_t *win, void **ba
     ret = best_component->osc_select(win, base, size, disp_unit, comm, info, flavor, model);
     if( OMPI_SUCCESS == ret ) {
         /* Intercept module functions with ours, based on selected component */
-        if( 0 == strcmp("rdma", best_component->osc_version.mca_component_name) ) {
-            OSC_MONITORING_SET_TEMPLATE(rdma, win->w_osc_module);
-        } else if( 0 == strcmp("sm", best_component->osc_version.mca_component_name) ) {
-            OSC_MONITORING_SET_TEMPLATE(sm, win->w_osc_module);
-        } else if( 0 == strcmp("pt2pt", best_component->osc_version.mca_component_name) ) {
-            OSC_MONITORING_SET_TEMPLATE(pt2pt, win->w_osc_module);
-#ifdef OMPI_WITH_OSC_PORTALS4
-        } else if( 0 == strcmp("portals4", best_component->osc_version.mca_component_name) ) {
-            OSC_MONITORING_SET_TEMPLATE(portals4, win->w_osc_module);
-#endif /* OMPI_WITH_OSC_PORTALS4 */
-        } else {
+        ret = ompi_mca_osc_monitoring_set_template(best_component, win->w_osc_module);
+        if (OMPI_ERR_NOT_SUPPORTED == ret) {
             OPAL_MONITORING_PRINT_WARN("osc: monitoring disabled: no module for this component "
                                        "(%s)", best_component->osc_version.mca_component_name);
-            return ret;
+            return OMPI_SUCCESS;
         }
     }
     return ret;
@@ -138,4 +124,3 @@ ompi_osc_monitoring_component_t mca_osc_monitoring_component = {
     },
     .priority = INT_MAX
 };
-

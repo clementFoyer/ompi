@@ -27,18 +27,17 @@
  * {template} parameter), we generate a set of every functions defined
  * in ompi_osc_base_module_t, the ompi_osc_monitoring_module_##
  * template ##_template variable recording the original set of
- * functions, and the ompi_osc_monitoring_## template ##_template
- * variable that record the generated set of functions. When a
- * function is called from the original module, we route the call to
- * our generated function that does the monitoring, and then we call
- * the original function that had been saved in the
+ * functions, and the generated set of functions is recorded as a
+ * static variable inside the initialization function. When a function
+ * is called from the original module, we route the call to our
+ * generated function that does the monitoring, and then we call the
+ * original function that had been saved in the
  * ompi_osc_monitoring_module_## template ##_template variable.
  */
 #define OSC_MONITORING_MODULE_TEMPLATE_GENERATE(template)               \
     /* Generate the proper symbol for the                               \
        ompi_osc_monitoring_module_## template ##_template variable */   \
-    OMPI_OSC_MONITORING_MODULE_GENERATE(template);                      \
-    OMPI_OSC_MONITORING_MODULE_INIT_GENERATE(template);                 \
+    OMPI_OSC_MONITORING_MODULE_GENERATE(template)                       \
     /* Generate each module specific functions */                       \
     OSC_MONITORING_GENERATE_TEMPLATE_ACCUMULATE(template)               \
     OSC_MONITORING_GENERATE_TEMPLATE_ACTIVE_TARGET(template)            \
@@ -46,26 +45,9 @@
     OSC_MONITORING_GENERATE_TEMPLATE_DYNAMIC(template)                  \
     OSC_MONITORING_GENERATE_TEMPLATE_MODULE(template)                   \
     OSC_MONITORING_GENERATE_TEMPLATE_PASSIVE_TARGET(template)           \
-    /* Set the mca_osc_monitoring_## template ##_template variable */   \
-    MCA_OSC_MONITORING_MODULE_TEMPLATE_GENERATE(template);              \
-    /* Generate template specific module initialization function */     \
-    static inline void*                                                 \
-    ompi_osc_monitoring_## template ##_set_template (ompi_osc_base_module_t*module) \
-    {                                                                   \
-        if( 1 == opal_atomic_add_fetch_32(&(OMPI_OSC_MONITORING_MODULE_INIT(template)), 1) ) { \
-	    /* Saves the original module functions in			\
-	     * ompi_osc_monitoring_module_## template ##_template	\
-	     */								\
-	    memcpy(&OMPI_OSC_MONITORING_MODULE_VARIABLE(template),	\
-		   module, sizeof(ompi_osc_base_module_t));		\
-	}								\
-	/* Replace the original functions with our generated ones */	\
-	memcpy(module, &OMPI_OSC_MONITORING_TEMPLATE_VARIABLE(template), \
-	       sizeof(ompi_osc_base_module_t));				\
-	return module;							\
-    }
-
-#define OSC_MONITORING_SET_TEMPLATE(template, module)           \
-    ompi_osc_monitoring_## template ##_set_template(module)
+    /* Generate template specific module initialization function:       \
+     * ompi_osc_monitoring_## template ##_set_template(ompi_osc_base_module_t*module) \
+     */                                                                 \
+    MCA_OSC_MONITORING_MODULE_TEMPLATE_GENERATE(template)
 
 #endif /* MCA_OSC_MONITORING_TEMPLATE_H */
