@@ -44,12 +44,11 @@ AC_DEFUN(
 #define MCA_OSC_MONITORING_GEN_TEMPLATE_H
 
 #include <ompi_config.h>
-#include <string.h>
 #include <ompi/mca/osc/osc.h>
 #include <ompi/mca/osc/monitoring/osc_monitoring_template.h>
 
-/***************************************/
-/* Include template generating macros  */
+/************************************************************/
+/* Include template generating macros and inlined functions */
 
 EOF
                # Generate each case in order to register the proper template functions
@@ -59,37 +58,36 @@ EOF
                done
                cat <<EOF >>$filename
 
-/***************************************/
+/************************************************************/
 
-static inline int
-ompi_mca_osc_monitoring_set_template(ompi_osc_base_component_t *best_component,
-                                     ompi_osc_base_module_t *module)
-{
-    /* Sorry for the lack on indentation, but the portability won over the cleanliness */   
+typedef struct {
+    const char * name;
+    ompi_osc_base_module_t * (*fct) (ompi_osc_base_module_t *);
+} osc_monitoring_components_list_t;
+
+static const osc_monitoring_components_list_t osc_monitoring_components_list[[]] = {
 EOF
                for comp in $components
                do
-                   echo "if ( 0 == strcmp(\"${comp}\", best_component->osc_version.mca_component_name) ) {" >>$filename
-                   echo "        OSC_MONITORING_SET_TEMPLATE_FCT_NAME(${comp}) (module);" >>$filename
-                   echo "    } else " >>$filename
+                   echo "    { .name = \"${comp}\", .fct = OSC_MONITORING_SET_TEMPLATE_FCT_NAME(${comp}) }," >>$filename
                done
                cat <<EOF >>$filename
-        return OMPI_ERR_NOT_SUPPORTED;
-    return OMPI_SUCCESS;
-}
+    { .name = NULL, .fct = NULL }
+};
 
 #endif /* MCA_OSC_MONITORING_GEN_TEMPLATE_H */
 EOF
-               unset filename components])
+               unset filename components
+              ])
          ])dnl
-])dnl
+    ])dnl
 
 # MCA_ompi_osc_monitoring_CONFIG()
 # ------------------------------------------------
 AC_DEFUN(
     [MCA_ompi_osc_monitoring_CONFIG],
     [AC_CONFIG_FILES([ompi/mca/osc/monitoring/Makefile])
-     
+
      AS_IF([test "$MCA_BUILD_ompi_common_monitoring_DSO_TRUE" = ''],
            [$1],
            [$2])

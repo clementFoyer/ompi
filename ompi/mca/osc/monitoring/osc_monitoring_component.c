@@ -8,6 +8,7 @@
  */
 
 #include <ompi_config.h>
+#include <string.h>
 #include "osc_monitoring.h"
 #include <ompi/constants.h>
 #include <ompi/communicator/communicator.h>
@@ -50,6 +51,20 @@ static int mca_osc_monitoring_component_query(struct ompi_win_t *win, void **bas
 {
     OPAL_MONITORING_PRINT_INFO("osc_component_query");
     return mca_osc_monitoring_component.priority;
+}
+
+static inline int
+ompi_mca_osc_monitoring_set_template(ompi_osc_base_component_t *best_component,
+                                     ompi_osc_base_module_t *module)
+{
+    osc_monitoring_components_list_t comp = osc_monitoring_components_list[0];
+    for (unsigned i = 0; NULL != comp.name; comp = osc_monitoring_components_list[++i]) {
+        if ( 0 == strcmp(comp.name, best_component->osc_version.mca_component_name) ) {
+            comp.fct(module);
+            return OMPI_SUCCESS;
+        }
+    }
+    return OMPI_ERR_NOT_SUPPORTED;
 }
 
 static int mca_osc_monitoring_component_select(struct ompi_win_t *win, void **base, size_t size, int disp_unit,
